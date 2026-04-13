@@ -1,0 +1,24 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    - cron: '0 10 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Dating App
+        run: |
+          curl -s "${{ secrets.DATING_SUPABASE_URL }}/rest/v1/profiles?select=id&limit=1" \
+            -H "apikey: ${{ secrets.DATING_SUPABASE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.DATING_SUPABASE_KEY }}"
+          echo "Dating app pinged"
+
+      - name: Ping Orders Nearby
+        run: |
+          curl -s "${{ secrets.ORDERS_SUPABASE_URL }}/rest/v1/categories?select=id&limit=1" \
+            -H "apikey: ${{ secrets.ORDERS_SUPABASE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.ORDERS_SUPABASE_KEY }}"
+          echo "Orders Nearby pinged"
