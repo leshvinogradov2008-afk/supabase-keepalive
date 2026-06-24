@@ -2,23 +2,36 @@ name: Supabase Keep Alive
 
 on:
   schedule:
-    - cron: '0 10 */3 * *'
+    - cron: '0 9 * * *'  # каждый день в 9:00 UTC
   workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
+      - uses: actions/checkout@v4
+
       - name: Ping Dating App
         run: |
           curl -s "${{ secrets.DATING_SUPABASE_URL }}/rest/v1/profiles?select=id&limit=1" \
             -H "apikey: ${{ secrets.DATING_SUPABASE_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.DATING_SUPABASE_KEY }}"
-          echo "Dating app pinged"
+          echo "Dating app pinged ✓"
 
       - name: Ping Orders Nearby
         run: |
           curl -s "${{ secrets.ORDERS_SUPABASE_URL }}/rest/v1/categories?select=id&limit=1" \
             -H "apikey: ${{ secrets.ORDERS_SUPABASE_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.ORDERS_SUPABASE_KEY }}"
-          echo "Orders Nearby pinged"
+          echo "Orders Nearby pinged ✓"
+
+      - name: Keep repo active
+        run: |
+          git config user.email "keepalive@github.com"
+          git config user.name "Keep Alive Bot"
+          echo "Last ping: $(date)" > last_ping.txt
+          git add last_ping.txt
+          git commit -m "ping $(date '+%Y-%m-%d')" || echo "Nothing to commit"
+          git push
